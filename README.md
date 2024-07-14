@@ -7,5 +7,8 @@ Implemented in 75 lines of Python code.
 
 ## Screenshots
 
-*MediaInfo GUI in macOS 13*  
-![MediaInfo GUI in macOS 13](screenshots/mediainfo_macos13.jpg)
+*MediaInfo GUI in macOS 13 (light)*  
+![MediaInfo GUI in macOS 13 (light)](screenshots/mediainfo_macos13.jpg)
+
+*MediaInfo GUI in macOS 13 (dark)*  
+![MediaInfo GUI in macOS 13 (dark)](screenshots/mediainfo_macos13_dark.jpg)
