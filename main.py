@@ -65,7 +65,7 @@ class App():
     def load_file(self, filename):
         self.win.setTitle_(f"MediaInfo - {filename}")
         infos = subprocess.run([BIN, filename],
-            capture_output=True, shell=False).stdout.decode()
+                capture_output=True, shell=False).stdout.decode()
         self.text_view.setString_(infos)
         self.win.orderFrontRegardless()
 
