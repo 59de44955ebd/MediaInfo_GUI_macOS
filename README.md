@@ -1,0 +1,1 @@
+# MediaInfo_GUI_macOS
