@@ -20,8 +20,7 @@ class App():
             def draggingEntered_(self, sender):
                 return True
             def performDragOperation_(self, sender):
-                pb = sender.draggingPasteboard()
-                pb_objects = pb.readObjectsForClasses_options_([Cocoa.NSURL], None)
+                pb_objects = sender.draggingPasteboard().readObjectsForClasses_options_([Cocoa.NSURL], None)
                 app.load_file(pb_objects[0].path())
                 return True
 
@@ -34,12 +33,10 @@ class App():
                 if IS_FROZEN:
                     app.load_file(filename)
                     return True
-                else:
-                    return False
+                return False
 
         Cocoa.NSApplication.sharedApplication()
-        delegate = MyAppDelegate.alloc().init()
-        Cocoa.NSApp().setDelegate_(delegate)
+        Cocoa.NSApp().setDelegate_(MyAppDelegate.alloc().init())
 
         self.win = Cocoa.NSWindow.alloc()
         self.win.initWithContentRect_styleMask_backing_defer_(((0.0, 0.0), (640, 900)),
@@ -61,6 +58,9 @@ class App():
 
         self.win.setContentView_(scroll_view)
         self.win.orderFrontRegardless()
+
+        if not IS_FROZEN and len(sys.argv) > 1:
+            self.load_file(sys.argv[1])
 
     def load_file(self, filename):
         self.win.setTitle_(f"MediaInfo - {filename}")
