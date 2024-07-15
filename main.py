@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import time
 import Cocoa
 from PyObjCTools import AppHelper
 
@@ -15,13 +16,15 @@ class App():
 
     def __init__(self):
         app = self
+        self.last_time = 0
+        self.last_count = 0
 
         class MyScrollView(Cocoa.NSScrollView):
             def draggingEntered_(self, sender):
                 return True
             def performDragOperation_(self, sender):
                 pb_objects = sender.draggingPasteboard().readObjectsForClasses_options_([Cocoa.NSURL], None)
-                app.load_file(pb_objects[0].path())
+                app.load_files([po.path() for po in pb_objects])
                 return True
 
         class MyAppDelegate(Cocoa.NSObject):
@@ -29,11 +32,10 @@ class App():
                 return True
             def applicationShouldTerminate_(self, sender):
                 return Cocoa.NSTerminateNow
-            def application_openFile_(self, application, filename):
+            def application_openFiles_(self, application, filenames):
                 if IS_FROZEN:
-                    app.load_file(filename)
-                    return True
-                return False
+                    app.load_files(filenames)
+                Cocoa.NSApp().replyToOpenOrPrint_(Cocoa.NSApplicationDelegateReplySuccess)
 
         Cocoa.NSApplication.sharedApplication()
         Cocoa.NSApp().setDelegate_(MyAppDelegate.alloc().init())
@@ -60,13 +62,19 @@ class App():
         self.win.orderFrontRegardless()
 
         if not IS_FROZEN and len(sys.argv) > 1:
-            self.load_file(sys.argv[1])
+            self.load_files(sys.argv[1:])
 
-    def load_file(self, filename):
-        self.win.setTitle_(f"MediaInfo - {filename}")
-        infos = subprocess.run([BIN, filename],
-                capture_output=True, shell=False).stdout.decode()
+    def load_files(self, filenames):
+        now = time.time()
+        infos = subprocess.run([BIN] + filenames, capture_output=True, shell=False).stdout.decode()
+        cnt = len(filenames)
+        if now - self.last_time < .25:
+            infos = self.text_view.string() + infos
+            cnt += self.last_count
+        self.win.setTitle_(f"MediaInfo - {cnt} files" if cnt > 1 else f"MediaInfo - {filenames[0]}")
         self.text_view.setString_(infos)
+        self.last_time = time.time()
+        self.last_count = cnt
 
 
 if __name__ == "__main__":
