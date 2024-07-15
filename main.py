@@ -34,7 +34,7 @@ class App():
                 return Cocoa.NSTerminateNow
             def application_openFiles_(self, application, filenames):
                 if IS_FROZEN:
-                    app.files += filenames
+                    app.files.extend(filenames)
                     if app.timer is None:
                         app.timer = Cocoa.NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(
                                 .25, self, objc.selector(self._load, signature=b'v@:'), None, False)
@@ -75,7 +75,7 @@ class App():
     def load_files(self, filenames):
         cnt = len(filenames)
         self.win.setTitle_(f"MediaInfo - {cnt} files" if cnt > 1 else f"MediaInfo - {filenames[0]}")
-        self.text_view.setString_(subprocess.run([BIN] + filenames, capture_output=True, shell=False).stdout.decode())
+        self.text_view.setString_(subprocess.run([BIN] + filenames, capture_output=True).stdout.decode())
 
 
 if __name__ == "__main__":
