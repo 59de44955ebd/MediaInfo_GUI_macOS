@@ -1,7 +1,7 @@
 import os
 import subprocess
 import sys
-import time
+import objc
 import Cocoa
 from PyObjCTools import AppHelper
 
@@ -16,8 +16,8 @@ class App():
 
     def __init__(self):
         app = self
-        self.last_time = 0
-        self.last_count = 0
+        self.timer = None
+        self.files = []
 
         class MyScrollView(Cocoa.NSScrollView):
             def draggingEntered_(self, sender):
@@ -34,8 +34,16 @@ class App():
                 return Cocoa.NSTerminateNow
             def application_openFiles_(self, application, filenames):
                 if IS_FROZEN:
-                    app.load_files(filenames)
+                    app.files += filenames
+                    if app.timer is None:
+                        app.timer = Cocoa.NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(
+                                .25, self, objc.selector(self._load, signature=b'v@:'), None, False)
                 Cocoa.NSApp().replyToOpenOrPrint_(Cocoa.NSApplicationDelegateReplySuccess)
+            def _load(self):
+                files = list(app.files)
+                app.timer = None
+                app.files = []
+                app.load_files(files)
 
         Cocoa.NSApplication.sharedApplication()
         Cocoa.NSApp().setDelegate_(MyAppDelegate.alloc().init())
@@ -65,16 +73,9 @@ class App():
             self.load_files(sys.argv[1:])
 
     def load_files(self, filenames):
-        now = time.time()
-        infos = subprocess.run([BIN] + filenames, capture_output=True, shell=False).stdout.decode()
         cnt = len(filenames)
-        if now - self.last_time < .25:
-            infos = self.text_view.string() + infos
-            cnt += self.last_count
         self.win.setTitle_(f"MediaInfo - {cnt} files" if cnt > 1 else f"MediaInfo - {filenames[0]}")
-        self.text_view.setString_(infos)
-        self.last_time = time.time()
-        self.last_count = cnt
+        self.text_view.setString_(subprocess.run([BIN] + filenames, capture_output=True, shell=False).stdout.decode())
 
 
 if __name__ == "__main__":
