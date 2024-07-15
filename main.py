@@ -41,7 +41,7 @@ class App():
         self.win = Cocoa.NSWindow.alloc()
         self.win.initWithContentRect_styleMask_backing_defer_(((0.0, 0.0), (640, 900)),
                 Cocoa.NSTitledWindowMask | Cocoa.NSClosableWindowMask | Cocoa.NSResizableWindowMask | Cocoa.NSMiniaturizableWindowMask,
-                2, 0)
+                Cocoa.NSBackingStoreBuffered, False)
         self.win.setLevel_(Cocoa.NSNormalWindowLevel)
         self.win.center()
 
@@ -67,7 +67,6 @@ class App():
         infos = subprocess.run([BIN, filename],
                 capture_output=True, shell=False).stdout.decode()
         self.text_view.setString_(infos)
-        self.win.orderFrontRegardless()
 
 
 if __name__ == "__main__":
